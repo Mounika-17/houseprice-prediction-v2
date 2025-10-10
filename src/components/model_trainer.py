@@ -8,13 +8,26 @@ from src.exception import CustomException
 from src.logger import logging
 from src.utils import save_object
 
-from src.components.data_transformation import DataTransformation
 from sklearn.linear_model import (
-    LinearRegression, Ridge, RidgeCV, Lasso, LassoCV, ElasticNet, ElasticNetCV
+    LinearRegression, RidgeCV, LassoCV, ElasticNetCV
 )
-from sklearn.model_selection import GridSearchCV
-from sklearn.preprocessing import StandardScaler
-from sklearn.pipeline import Pipeline
+from sklearn.tree import DecisionTreeRegressor
+from sklearn.ensemble import (
+    RandomForestRegressor, GradientBoostingRegressor, AdaBoostRegressor
+)
+from sklearn.svm import SVR
+from sklearn.neighbors import KNeighborsRegressor
+
+# Optional imports (only if installed)
+try:
+    from xgboost import XGBRegressor
+except ImportError:
+    XGBRegressor = None
+
+try:
+    from catboost import CatBoostRegressor
+except ImportError:
+    CatBoostRegressor = None
 
 
 # -----------------------------
@@ -62,9 +75,25 @@ class ModelTrainer:
                     cv=5,
                     max_iter=50000,
                 ),
+                "DecisionTree": DecisionTreeRegressor(random_state=42),
+                "RandomForest": RandomForestRegressor(n_estimators=200, random_state=42),
+                "GradientBoosting": GradientBoostingRegressor(n_estimators=200, random_state=42),
+                "AdaBoost": AdaBoostRegressor(n_estimators=200, random_state=42),
+                "SVR": SVR(kernel='rbf', C=100, gamma='auto'),
+                "KNeighbors": KNeighborsRegressor(n_neighbors=5)
             }
 
-            # Evaluate each model using K-Fold
+            # Add optional models if available
+            if XGBRegressor is not None:
+                base_models["XGBRegressor"] = XGBRegressor(
+                    n_estimators=300, learning_rate=0.05, random_state=42
+                )
+            if CatBoostRegressor is not None:
+                base_models["CatBoostRegressor"] = CatBoostRegressor(
+                    iterations=300, learning_rate=0.05, verbose=False, random_state=42
+                )
+
+            # Evaluate each model using K-Fold CV
             results = {}
             cv = KFold(n_splits=5, shuffle=True, random_state=42)
 
@@ -82,7 +111,7 @@ class ModelTrainer:
 
             logging.info(f"Best Model: {best_model_name} with RMSE {results[best_model_name]['CV_RMSE_Mean']:.4f}")
 
-            # Retrain on full training data
+            # Retrain best model on full training data
             best_model.fit(X_train, y_train)
 
             # Evaluate on test data
@@ -96,7 +125,8 @@ class ModelTrainer:
                 obj=best_model,
             )
 
-            return test_rmse
+            logging.info(f"Saved best model: {best_model_name}")
+            return test_rmse, best_model_name, results
 
         except Exception as e:
             raise CustomException(e, sys)
