@@ -1,0 +1,16 @@
+pandas
+numpy
+matplotlib
+seaborn
+ipykernel
+scipy
+stats
+statsmodels
+scikit-learn==1.5.2
+category_encoders
+preprocessing
+xgboost
+catboost
+flask
+dill
+-e .
