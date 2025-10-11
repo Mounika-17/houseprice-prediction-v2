@@ -7,7 +7,7 @@ from sklearn.model_selection import train_test_split
 from dataclasses import dataclass
 from src.components.data_transformation import DataTransformation
 from src.config import ordinal_features, nominal_features, categorical_features,continuous_numeric_features,fill_none_cols,zero_fill_cols,high_cardinality_features, target_feature    
-#from src.components.model_trainer import ModelTrainer
+from src.components.model_trainer import ModelTrainer
 
 import warnings
 warnings.filterwarnings("ignore")
@@ -61,6 +61,6 @@ if __name__ == "__main__":
     data_transformation = DataTransformation()
     train_array, test_array, _ = data_transformation.initiate_data_transformation(train_data, test_data, ordinal_features, nominal_features,high_cardinality_features, continuous_numeric_features,fill_none_cols,zero_fill_cols, target_feature)
 
-    #modeltrainer=ModelTrainer()
-    #modeltrainer.initiate_model_trainer(train_array, test_array)
+    modeltrainer=ModelTrainer()
+    modeltrainer.initiate_model_trainer(train_array, test_array)
 
