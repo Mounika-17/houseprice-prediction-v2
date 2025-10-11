@@ -2,53 +2,35 @@ import os
 import sys
 import numpy as np
 from dataclasses import dataclass
-from sklearn.model_selection import cross_val_score, KFold
-from sklearn.metrics import make_scorer, mean_squared_error
+from sklearn.model_selection import GridSearchCV, KFold, cross_val_score
+from sklearn.metrics import make_scorer, mean_squared_error, r2_score
+from sklearn.linear_model import (
+    LinearRegression, Ridge, Lasso, ElasticNet, BayesianRidge, HuberRegressor
+)
+from sklearn.ensemble import (
+    RandomForestRegressor, GradientBoostingRegressor, AdaBoostRegressor
+)
+from xgboost import XGBRegressor
+from sklearn.svm import SVR
 from src.exception import CustomException
 from src.logger import logging
 from src.utils import save_object
 
-from sklearn.linear_model import (
-    LinearRegression, RidgeCV, LassoCV, ElasticNetCV
-)
-from sklearn.tree import DecisionTreeRegressor
-from sklearn.ensemble import (
-    RandomForestRegressor, GradientBoostingRegressor, AdaBoostRegressor
-)
-from sklearn.svm import SVR
-from sklearn.neighbors import KNeighborsRegressor
 
-# Optional imports (only if installed)
-try:
-    from xgboost import XGBRegressor
-except ImportError:
-    XGBRegressor = None
-
-try:
-    from catboost import CatBoostRegressor
-except ImportError:
-    CatBoostRegressor = None
-
-
-# -----------------------------
-# Config class
-# -----------------------------
 @dataclass
 class ModelTrainerConfig:
     trained_model_file_path = os.path.join("artifacts", "model.pkl")
 
-
 # -----------------------------
-# RMSE Scorer
+# Custom RMSE scorer
 # -----------------------------
 def rmse(y_true, y_pred):
     return np.sqrt(mean_squared_error(y_true, y_pred))
 
 rmse_scorer = make_scorer(rmse, greater_is_better=False)
 
-
 # -----------------------------
-# Main Class
+# Model Trainer Class
 # -----------------------------
 class ModelTrainer:
     def __init__(self):
@@ -64,69 +46,111 @@ class ModelTrainer:
                 test_arr[:, -1],
             )
 
-            # Define models
-            base_models = {
-                "LinearRegression": LinearRegression(),
-                "RidgeCV": RidgeCV(alphas=[0.1, 1.0, 10.0], cv=5),
-                "LassoCV": LassoCV(alphas=[0.001, 0.1, 1.0, 10.0], cv=5, max_iter=50000),
-                "ElasticNetCV": ElasticNetCV(
-                    alphas=[0.001, 0.1, 1.0, 10.0],
-                    l1_ratio=[0.1, 0.5, 0.9],
-                    cv=5,
-                    max_iter=50000,
-                ),
-                "DecisionTree": DecisionTreeRegressor(random_state=42),
-                "RandomForest": RandomForestRegressor(n_estimators=200, random_state=42),
-                "GradientBoosting": GradientBoostingRegressor(n_estimators=200, random_state=42),
-                "AdaBoost": AdaBoostRegressor(n_estimators=200, random_state=42),
-                "SVR": SVR(kernel='rbf', C=100, gamma='auto'),
-                "KNeighbors": KNeighborsRegressor(n_neighbors=5)
-            }
-
-            # Add optional models if available
-            if XGBRegressor is not None:
-                base_models["XGBRegressor"] = XGBRegressor(
-                    n_estimators=300, learning_rate=0.05, random_state=42
-                )
-            if CatBoostRegressor is not None:
-                base_models["CatBoostRegressor"] = CatBoostRegressor(
-                    iterations=300, learning_rate=0.05, verbose=False, random_state=42
-                )
-
-            # Evaluate each model using K-Fold CV
-            results = {}
             cv = KFold(n_splits=5, shuffle=True, random_state=42)
 
-            for name, model in base_models.items():
-                logging.info(f"Evaluating {name} with cross-validation...")
-                scores = cross_val_score(model, X_train, y_train, cv=cv, scoring=rmse_scorer)
-                results[name] = {
-                    "CV_RMSE_Mean": -scores.mean(),
-                    "CV_RMSE_Std": scores.std(),
+            # -----------------------------
+            # Models and their Param Grids
+            # -----------------------------
+            models_and_params = {
+                "LinearRegression": (LinearRegression(), {}),
+                "Ridge": (Ridge(), {"alpha": [0.01, 0.1, 1.0, 10.0, 100.0]}),
+                "Lasso": (Lasso(max_iter=50000), {"alpha": [0.001, 0.01, 0.1, 1.0, 10.0]}),
+                "ElasticNet": (
+                    ElasticNet(max_iter=50000),
+                    {"alpha": [0.001, 0.01, 0.1, 1.0], "l1_ratio": [0.1, 0.5, 0.9]}
+                ),
+                "BayesianRidge": (
+                    BayesianRidge(),
+                    {"alpha_1": [1e-6, 1e-5, 1e-4], "alpha_2": [1e-6, 1e-5, 1e-4]}
+                ),
+                "HuberRegressor": (
+                    HuberRegressor(max_iter=50000),
+                    {"epsilon": [1.1, 1.3, 1.5]}
+                ),
+                "SVR": (
+                    SVR(),
+                    {"C": [0.1, 1, 10], "kernel": ["linear", "rbf"], "gamma": ["scale", "auto"]}
+                ),
+                "RandomForest": (
+                    RandomForestRegressor(random_state=42),
+                    {"n_estimators": [50, 100, 200], "max_depth": [5, 10, None], "min_samples_split": [2, 5, 10]}
+                ),
+                "GradientBoosting": (
+                    GradientBoostingRegressor(random_state=42),
+                    {"n_estimators": [50, 100, 200], "learning_rate": [0.01, 0.1, 0.2], "max_depth": [3, 5]}
+                ),
+                "AdaBoost": (
+                    AdaBoostRegressor(random_state=42),
+                    {"n_estimators": [50, 100, 200], "learning_rate": [0.01, 0.1, 0.5, 1.0]}
+                ),
+                "XGBoost": (
+                    XGBRegressor(eval_metric="rmse", random_state=42),
+                    {"n_estimators": [100, 200], "learning_rate": [0.01, 0.1, 0.2], "max_depth": [3, 5, 7]}
+                ),
+            }
+
+            # -----------------------------
+            # Run GridSearchCV for all models
+            # -----------------------------
+            best_overall_model = None
+             #initializes the variable best_overall_rmse to infinity.
+            best_overall_rmse = float("inf")
+            best_results = {}
+
+            for model_name, (model, param_grid) in models_and_params.items():
+                logging.info(f"Running GridSearchCV for {model_name}")
+
+                grid_search = GridSearchCV(
+                    estimator=model,
+                    param_grid=param_grid,
+                    cv=cv,
+                    scoring=rmse_scorer,
+                    n_jobs=-1
+                )
+                grid_search.fit(X_train, y_train)
+                best_model = grid_search.best_estimator_
+
+                # Cross-validation scores for the best model
+                cv_scores = cross_val_score(best_model, X_train, y_train, cv=cv, scoring=rmse_scorer)
+                cv_rmse_mean = -cv_scores.mean()
+                cv_rmse_std = cv_scores.std()
+
+                # Evaluate on test data
+                y_pred_test = best_model.predict(X_test)
+                test_rmse = rmse(y_test, y_pred_test)
+                test_r2 = r2_score(y_test, y_pred_test)
+
+                logging.info(
+                    f"{model_name}: CV RMSE={cv_rmse_mean:.4f} ± {cv_rmse_std:.4f}, "
+                    f"Test RMSE={test_rmse:.4f}, R²={test_r2:.4f}"
+                )
+
+                results = {
+                    "best_params": grid_search.best_params_,
+                    "cv_rmse_mean": cv_rmse_mean,
+                    "cv_rmse_std": cv_rmse_std,
+                    "test_rmse": test_rmse,
+                    "test_r2": test_r2
                 }
 
-            # Select best model
-            best_model_name = min(results, key=lambda k: results[k]['CV_RMSE_Mean'])
-            best_model = base_models[best_model_name]
+                # Update if this model is the best
+                if cv_rmse_mean < best_overall_rmse:
+                    best_overall_model = best_model
+                    best_overall_rmse = cv_rmse_mean
+                    best_results = {**results, "model": model_name}
 
-            logging.info(f"Best Model: {best_model_name} with RMSE {results[best_model_name]['CV_RMSE_Mean']:.4f}")
-
-            # Retrain best model on full training data
-            best_model.fit(X_train, y_train)
-
-            # Evaluate on test data
-            y_pred = best_model.predict(X_test)
-            test_rmse = rmse(y_test, y_pred)
-            logging.info(f"Test RMSE: {test_rmse:.4f}")
-
-            # Save model
+            # Save the best model
             save_object(
                 file_path=self.model_trainer_config.trained_model_file_path,
-                obj=best_model,
+                obj=best_overall_model
             )
 
-            logging.info(f"Saved best model: {best_model_name}")
-            return test_rmse, best_model_name, results
+            logging.info(f"Best Model: {best_results['model']}")
+            logging.info(f"Best Params: {best_results['best_params']}")
+            logging.info(f"CV RMSE: {best_results['cv_rmse_mean']:.4f}")
+            logging.info(f"Test R²: {best_results['test_r2']:.4f}")
+
+            return best_results
 
         except Exception as e:
             raise CustomException(e, sys)
