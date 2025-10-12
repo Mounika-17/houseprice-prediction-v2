@@ -5,7 +5,6 @@ from dataclasses import dataclass
 import numpy as np
 import pandas as pd
 from sklearn.pipeline import Pipeline
-from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import OneHotEncoder, StandardScaler, OrdinalEncoder
 from sklearn.compose import ColumnTransformer
 from category_encoders import TargetEncoder
@@ -135,15 +134,8 @@ class OutlierHandler(BaseEstimator, TransformerMixin):
 # -----------------------------
 # Config
 # -----------------------------
-@dataclass
-class DataTransformationConfig:
-    # This defines where the preprocessing object (e.g., a fitted ColumnTransformer or Pipeline) will be saved after training.
-    preprocessor_obj_file_path = os.path.join('artifacts', "preprocessor.pkl")
 
 class DataTransformation:
-    def __init__(self):
-       # It will use the config object (DataTransformationConfig) to know where to save or load preprocessing objects.
-        self.data_transformation_config = DataTransformationConfig()
 
     def build_preprocessor(self, ordinal_features, nominal_features, high_card_features, continuous_numeric_features):
         preprocessor = ColumnTransformer(
@@ -161,66 +153,21 @@ class DataTransformation:
 
     def get_data_transformer_object(self, ordinal_features, nominal_features, high_card_features, continuous_numeric_features,fill_none_cols,
         zero_fill_cols):
+        '''Return a preprocessing pipeline (not fitted yet).'''
         try:
             preprocessor = self.build_preprocessor(ordinal_features, nominal_features, high_card_features, continuous_numeric_features)
             custmomimputer= CustomImputer(
                 fill_none_cols,
                 zero_fill_cols
             )
-            pipe = Pipeline([
+            pipeline = Pipeline([
                 ('custom_imputer', custmomimputer),
                 ('outliers', OutlierHandler()),
                 ('encode_scale', preprocessor),
             ])
-            return pipe
+            logging.info("Preprocessing object created")
+            return pipeline
+        
         except Exception as e:
             raise CustomException(e, sys)
-
-    def initiate_data_transformation(self, train_path, test_path, ordinal_features, nominal_features, high_card_features, continuous_numeric_features,fill_none_cols,
-        zero_fill_cols, target_feature):
-        '''Applies preprocessing, saves preprocessor, and returns train/test arrays.'''
-        try:
-            logging.info("Reading train and test data")
-            train_df = pd.read_csv(train_path)
-            test_df = pd.read_csv(test_path)
-
-            logging.info("Splitting input and target features")
-            input_feature_train_df = train_df.drop(columns=[target_feature], axis=1)
-            target_feature_train_df = train_df[target_feature]
-
-            input_feature_test_df = test_df.drop(columns=[target_feature], axis=1)
-            target_feature_test_df = test_df[target_feature]
-            
-            logging.info("Building preprocessing pipeline")
-            preprocessing_obj = self.get_data_transformer_object(
-                ordinal_features,
-                nominal_features,
-                high_card_features,
-                continuous_numeric_features,
-                fill_none_cols,
-                zero_fill_cols
-            )
-
-            logging.info("Applying preprocessing transformations on train and test data")
-
-            input_feature_train_arr = preprocessing_obj.fit_transform(input_feature_train_df, target_feature_train_df)
-            input_feature_test_arr = preprocessing_obj.transform(input_feature_test_df)
-            
-            # np.c_ is a numpy function that concatenates arrays along the second axis (columns). Here, it combines the transformed input features with the target feature to create a complete dataset for both training and testing.
-            # np.array(target_feature_train_df) converts the target feature from a pandas Series to a numpy array, which is necessary for concatenation.
-            train_arr = np.c_[input_feature_train_arr, np.array(target_feature_train_df)]
-            test_arr = np.c_[input_feature_test_arr, np.array(target_feature_test_df)]
-
-            logging.info("Saving preprocessing object")
-            save_object(
-                file_path=self.data_transformation_config.preprocessor_obj_file_path,
-                obj=preprocessing_obj
-            )
-
-            return (
-                train_arr,
-                test_arr,
-                self.data_transformation_config.preprocessor_obj_file_path,
-            )
-        except Exception as e:
-            raise CustomException(e, sys)
+        

@@ -5,8 +5,7 @@ from src.logger import logging
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from dataclasses import dataclass
-from src.components.data_transformation import DataTransformation
-from src.config import ordinal_features, nominal_features, categorical_features,continuous_numeric_features,fill_none_cols,zero_fill_cols,high_cardinality_features, target_feature    
+from src.components.data_transformation import DataTransformation  
 from src.components.model_trainer import ModelTrainer
 
 import warnings
@@ -53,14 +52,4 @@ class DataIngestion:
             )
         except Exception as e:
             raise CustomException(e, sys)
-        
-if __name__ == "__main__":
-    obj = DataIngestion()
-    train_data,test_data= obj.initiate_data_ingestion()
-
-    data_transformation = DataTransformation()
-    train_array, test_array, _ = data_transformation.initiate_data_transformation(train_data, test_data, ordinal_features, nominal_features,high_cardinality_features, continuous_numeric_features,fill_none_cols,zero_fill_cols, target_feature)
-
-    modeltrainer=ModelTrainer()
-    modeltrainer.initiate_model_trainer(train_array, test_array)
 
