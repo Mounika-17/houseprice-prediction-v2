@@ -1,7 +1,7 @@
 import sys
 import os
 from dataclasses import dataclass
-
+from src.logger import logger
 import numpy as np
 import pandas as pd
 from sklearn.pipeline import Pipeline
@@ -10,8 +10,9 @@ from sklearn.compose import ColumnTransformer
 from category_encoders import TargetEncoder
 
 from src.exception import CustomException
-from src.logger import logging
-from src.utils import save_object
+
+import warnings
+warnings.filterwarnings("ignore")
 
 # -----------------------------
 # Custom Transformers
@@ -165,7 +166,7 @@ class DataTransformation:
                 ('outliers', OutlierHandler()),
                 ('encode_scale', preprocessor),
             ])
-            logging.info("Preprocessing object created")
+            logger.info("Preprocessing object created")
             return pipeline
         
         except Exception as e:

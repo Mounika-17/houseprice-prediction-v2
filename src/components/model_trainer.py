@@ -1,6 +1,8 @@
 import os
 import sys
 import numpy as np
+import pandas as pd
+from src.logger import logger
 from dataclasses import dataclass
 from sklearn.model_selection import GridSearchCV, KFold, cross_val_score
 from sklearn.metrics import make_scorer, mean_squared_error, r2_score
@@ -13,12 +15,11 @@ from sklearn.ensemble import (
 from xgboost import XGBRegressor
 from sklearn.svm import SVR
 from sklearn.pipeline import Pipeline
+import warnings
+warnings.filterwarnings("ignore")
 
 from src.exception import CustomException
-from src.logger import logging
 from src.utils import save_object
-from src.components.data_transformation import DataTransformation
-from src.config import ordinal_features, nominal_features, high_cardinality_features, continuous_numeric_features, fill_none_cols, zero_fill_cols
 
 @dataclass
 class ModelTrainerConfig:
@@ -42,16 +43,24 @@ class ModelTrainer:
     def __init__(self):
         self.model_trainer_config = ModelTrainerConfig()
 
-    def initiate_model_trainer(self, train_data_path, test_data_path, preprocessor):
+    def initiate_model_trainer(self, train_data_path, test_data_path, preprocessor,target_feature):
         try:
-            logging.info("Splitting training and test input data")
-            X_train, y_train, X_test, y_test = (
-                train_data_path[:, :-1],
-                train_data_path[:, -1],
-                test_data_path[:, :-1],
-                test_data_path[:, -1],
-            )
+            logger.info("Splitting training and test input data")
+           # Step 1: Load data
+            train_df = pd.read_csv(train_data_path)
+            test_df = pd.read_csv(test_data_path)
 
+            # Step 2: Separate features and target
+            target_column = target_feature
+            X_train = train_df.drop(columns=[target_column])
+            y_train = train_df[target_column]
+            X_test = test_df.drop(columns=[target_column])
+            y_test = test_df[target_column]
+
+            # Apply the log transformation to the target variable
+            logger.info("Applying log transformation to the target variable")
+            y_train_log = np.log1p(y_train)
+            y_test_log = np.log1p(y_test)
             # -----------------------------
             # Get Preprocessor
             # ----------------------------
@@ -64,23 +73,24 @@ class ModelTrainer:
             models_and_params = {
                 "LinearRegression": (LinearRegression(), {}),
                 "Ridge": (
-                    Ridge(), 
+                    Ridge(max_iter=10000), 
                     {"model__alpha": [0.01, 0.1, 1.0, 10.0, 100.0]}
                     ),
                 "Lasso": (
-                    Lasso(max_iter=50000), 
+                    Lasso(max_iter=100000, tol=0.0001), 
                     {"model__alpha": [0.001, 0.01, 0.1, 1.0, 10.0]}
                     ),
                 "ElasticNet": (
-                    ElasticNet(max_iter=50000),
+                    ElasticNet(max_iter=100000, tol=0.0001),
                     {"model__alpha": [0.001, 0.01, 0.1, 1.0], "model__l1_ratio": [0.1, 0.5, 0.9]}
                 ),
                 "BayesianRidge": (
                     BayesianRidge(),
-                    {"model__alpha_1": [1e-6, 1e-5, 1e-4], "model__alpha_2": [1e-6, 1e-5, 1e-4]}
+                    {"model__alpha_1": [1e-6, 1e-5, 1e-4],
+                      "model__alpha_2": [1e-6, 1e-5, 1e-4]}
                 ),
                 "HuberRegressor": (
-                    HuberRegressor(max_iter=50000),
+                    HuberRegressor(max_iter=100000, alpha=0.0001, epsilon=1.35, tol=0.0001),
                     {"model__epsilon": [1.1, 1.3, 1.5]}
                 ),
                 "SVR": (
@@ -118,7 +128,7 @@ class ModelTrainer:
             best_results = {}
 
             for model_name, (model, param_grid) in models_and_params.items():
-                logging.info(f"Running GridSearchCV for {model_name}")
+                logger.info(f"Running GridSearchCV for {model_name}")
 
                 pipeline = Pipeline(steps=[
                     ("preprocessor", preprocessor),
@@ -132,22 +142,26 @@ class ModelTrainer:
                     scoring=rmse_scorer,
                     n_jobs=-1
                 )
-                grid_search.fit(X_train, y_train)
+                grid_search.fit(X_train, y_train_log)
                 best_model = grid_search.best_estimator_
 
                 # Cross-validation scores for the best model
-                cv_scores = cross_val_score(best_model, X_train, y_train, cv=cv, scoring=rmse_scorer, n_jobs=-1)
+                cv_scores = cross_val_score(best_model, X_train, y_train_log, cv=cv, scoring=rmse_scorer, n_jobs=-1)
                 cv_rmse_mean = -cv_scores.mean()
                 cv_rmse_std = cv_scores.std()
 
                 # Evaluate on test data
-                y_pred_test = best_model.predict(X_test)
+                y_pred_test_log = best_model.predict(X_test)
+
+                # Inverse-transform predictions and test targets to original scale
+                y_pred_test = np.expm1(y_pred_test_log)  # Inverse of log1p transformation
+                y_test = np.expm1(y_test_log)  # Inverse of log1p transformation
                 test_rmse = rmse(y_test, y_pred_test)
                 test_r2 = r2_score(y_test, y_pred_test)
 
-                logging.info(
+                logger.info(
                     f"{model_name}: CV RMSE={cv_rmse_mean:.4f} ± {cv_rmse_std:.4f}, "
-                    f"Test RMSE={test_rmse:.4f}, R²={test_r2:.4f}"
+                    f"Test RMSE (original scale)={test_rmse:.4f}, R²={test_r2:.4f}"
                 )
 
                 results = {
@@ -171,11 +185,12 @@ class ModelTrainer:
                 file_path=self.model_trainer_config.trained_model_file_path,
                 obj=best_overall_model
             )
-
-            logging.info(f"Best Model: {best_results['model']}")
-            logging.info(f"Best Params: {best_results['best_params']}")
-            logging.info(f"CV RMSE: {best_results['cv_rmse_mean']:.4f}")
-            logging.info(f"Test R²: {best_results['test_r2']:.4f}")
+            logger.info(f"Saved best model pipeline to: {self.model_trainer_config.trained_model_file_path}")
+            print(f"Best Model: {best_results['model']} | RMSE: {best_results['test_rmse']:.4f} | R²: {best_results['test_r2']:.4f}")
+            logger.info(f"Best Model: {best_results['model']}")
+            logger.info(f"Best Params: {best_results['best_params']}")
+            logger.info(f"CV RMSE: {best_results['cv_rmse_mean']:.4f}")
+            logger.info(f"Test R²: {best_results['test_r2']:.4f}")
 
             return best_results
 
