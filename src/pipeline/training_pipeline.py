@@ -1,4 +1,4 @@
-import logging as logger
+from src.logger import logger
 from src.components.data_ingestion import DataIngestion
 from src.components.data_transformation import DataTransformation
 from src.components.model_trainer import ModelTrainer
