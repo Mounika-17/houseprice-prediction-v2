@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🏠 House Price Prediction</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>🏡 House Price Prediction App</h1>
+        <form action="{{ url_for('predict_datapoint')}}" method="post">
+
+            <div class="row">
+                <label>MSZoning:</label>
+                <input type="text" name="MSZoning" placeholder="MSZoning" required>
+            </div>
+
+            <div class="row">
+                <label>Neighborhood:</label>
+                <input type="text" name="Neighborhood" placeholder="Neighborhood" required>
+            </div>
+
+            <div class="row">
+                <label>LotFrontage:</label>
+                <input type="number" step="any" name="LotFrontage" required>
+            </div>
+
+            <div class="row">
+                <label>LotArea:</label>
+                <input type="number" name="LotArea" required>
+            </div>
+
+            <div class="row">
+                <label>OverallQual (1-10):</label>
+                <input type="number" name="OverallQual" required>
+            </div>
+
+            <div class="row">
+                <label>OverallCond (1-10):</label>
+                <input type="number" name="OverallCond" required>
+            </div>
+
+            <div class="row">
+                <label>YearBuilt:</label>
+                <input type="number" name="YearBuilt" required>
+            </div>
+
+            <div class="row">
+                <label>YearRemodAdd:</label>
+                <input type="number" name="YearRemodAdd" required>
+            </div>
+
+            <div class="row">
+                <label>GrLivArea (sq ft):</label>
+                <input type="number" name="GrLivArea" required>
+            </div>
+
+            <div class="row">
+                <label>FullBath:</label>
+                <input type="number" name="FullBath" required>
+            </div>
+
+            <div class="row">
+                <label>BedroomAbvGr:</label>
+                <input type="number" name="BedroomAbvGr" required>
+            </div>
+
+            <div class="row">
+                <label>KitchenQual:</label>
+                <input type="text" name="KitchenQual" placeholder="Gd, TA, Ex" required>
+            </div>
+
+            <div class="row">
+                <label>GarageCars:</label>
+                <input type="number" name="GarageCars" required>
+            </div>
+
+            <div class="row">
+                <label>GarageArea:</label>
+                <input type="number" name="GarageArea" required>
+            </div>
+
+            <div class="row">
+                <label>Fireplaces:</label>
+                <input type="number" name="Fireplaces" required>
+            </div>
+
+            <div class="row">
+                <label>TotalBsmtSF:</label>
+                <input type="number" name="TotalBsmtSF" required>
+            </div>
+
+            <button type="submit">Predict Price</button>
+        </form>
+
+        {% if results %}
+            <h2 class="result"> Predicted House Price: ${{ results }}</h2>
+        {% endif %}
+    </div>
+</body>
+</html>

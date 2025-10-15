@@ -1,0 +1,83 @@
+/*---------- Form styling ----------*/
+body {
+    font-family: 'Poppins', sans-serif;
+    background: #f5f6fa;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+.container {
+    background: #fff;
+    border-radius: 15px;
+    padding: 30px 40px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    width: 450px;
+}
+
+h1 {
+    text-align: center;
+    color: #2f3640;
+    margin-bottom: 20px;
+}
+
+.row {
+    margin-bottom: 15px;
+}
+
+label {
+    font-weight: bold;
+    display: block;
+    margin-bottom: 5px;
+}
+
+input {
+    width: 100%;
+    padding: 8px;
+    border-radius: 8px;
+    border: 1px solid #dcdde1;
+}
+
+button {
+    width: 100%;
+    padding: 10px;
+    background: #273c75;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+button:hover {
+    background: #40739e;
+}
+
+.result {
+    text-align: center;
+    color: #44bd32;
+    margin-top: 25px;
+}
+
+/* ---------- Homepage styling ---------- */
+
+p {
+    margin: 0;
+}
+
+a.cta-link {
+    display: inline-block;
+    padding: 12px 25px;
+    background-color: #273c75;
+    color: white;
+    text-decoration: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: background 0.3s ease;
+}
+
+a.cta-link:hover {
+    background-color: #40739e;
+}
+

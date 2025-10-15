@@ -22,16 +22,21 @@ from scipy.stats import yeojohnson
 
 class CustomImputer(BaseEstimator, TransformerMixin):
     def __init__(self, fill_none_cols=None, zero_fill_cols=None):
-        self.fill_none_cols = fill_none_cols if fill_none_cols else []
-        self.zero_fill_cols = zero_fill_cols if zero_fill_cols else []
-        self.fill_values_ = {}   # stores learned values
+        # store the parameters exactly as they are passed. Otherwise, if they are None, we set them to empty lists causes an error when the gridsearchCV tries to clone the transformer.
+        self.fill_none_cols = fill_none_cols 
+        self.zero_fill_cols = zero_fill_cols
 
     def fit(self, X, y=None):
         X_ = X.copy()
+        # Initialize learned fill_values_ as an empty dictionary
+        self.fill_values_ = {}
 
+        # If fill_none_cols or zero_fill_cols are None, set them to empty lists
+        fill_none_cols = self.fill_none_cols if self.fill_none_cols is not None else []
+        zero_fill_cols = self.zero_fill_cols if self.zero_fill_cols is not None else []
         # Learn rules for all other columns
         for col in X_.columns:
-            if col in self.fill_none_cols or col in self.zero_fill_cols:  # The purpose of fit is to learn from the training data (compute medians, modes, etc.).But for fill_none_cols and zero_fill_cols, we don’t need to “learn” anything. We just need to transform them so we handled it in transform method.
+            if col in fill_none_cols or col in zero_fill_cols:  # The purpose of fit is to learn from the training data (compute medians, modes, etc.).But for fill_none_cols and zero_fill_cols, we don’t need to “learn” anything. We just need to transform them so we handled it in transform method.
                 continue
 
             if X_[col].dtype == "object":
@@ -49,12 +54,14 @@ class CustomImputer(BaseEstimator, TransformerMixin):
     def transform(self, X):
         X_ = X.copy()
 
+        fill_none_cols = self.fill_none_cols if self.fill_none_cols is not None else []
+        zero_fill_cols = self.zero_fill_cols if self.zero_fill_cols is not None else []
         # Apply fixed rules
-        for col in self.fill_none_cols:
+        for col in fill_none_cols:
             if col in X_.columns:
                 X_[col] = X_[col].fillna("None")
 
-        for col in self.zero_fill_cols:
+        for col in zero_fill_cols:
             if col in X_.columns:
                 X_[col] = X_[col].fillna(0)
 
