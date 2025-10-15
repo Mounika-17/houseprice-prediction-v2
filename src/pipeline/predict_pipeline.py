@@ -9,15 +9,15 @@ class PredictPipeline:
         pass
 
     def predict(self, features):
-        """
-        This function loads the trained model (which already includes preprocessing)
-        and predicts house prices for given input features.
-        """
+        '''
+        Predicts the house price with the given input features.
+        model.pkl already includes the fitted preprocessor + model.
+        '''
         try:
             model_path = "artifacts/model.pkl"
             model = load_object(file_path=model_path)
 
-            # Since model.pkl already includes preprocessor, we can directly predict
+            # Directly predict since model.pkl has the preprocessing inside
             preds = model.predict(features)
             return preds
 
@@ -26,180 +26,55 @@ class PredictPipeline:
 
 
 class CustomData:
-    """
-    This class maps user input values to a pandas DataFrame
-    so that it can be passed to the model for prediction.
-    """
+    '''
+    This class maps user input from a web form to a DataFrame.
+    It ensures that the input data matches the features used during model training.
+    '''
 
     def __init__(self,
-                 MSSubClass: int,
                  MSZoning: str,
+                 Neighborhood: str,
                  LotFrontage: float,
                  LotArea: int,
-                 Street: str,
-                 Alley: str,
-                 LotShape: str,
-                 LandContour: str,
-                 Utilities: str,
-                 LotConfig: str,
-                 LandSlope: str,
-                 Neighborhood: str,
-                 Condition1: str,
-                 Condition2: str,
-                 BldgType: str,
-                 HouseStyle: str,
                  OverallQual: int,
                  OverallCond: int,
                  YearBuilt: int,
                  YearRemodAdd: int,
-                 RoofStyle: str,
-                 RoofMatl: str,
-                 Exterior1st: str,
-                 Exterior2nd: str,
-                 MasVnrType: str,
-                 MasVnrArea: float,
-                 ExterQual: str,
-                 ExterCond: str,
-                 Foundation: str,
-                 BsmtQual: str,
-                 BsmtCond: str,
-                 BsmtExposure: str,
-                 BsmtFinType1: str,
-                 BsmtFinSF1: int,
-                 BsmtFinType2: str,
-                 BsmtFinSF2: int,
-                 BsmtUnfSF: int,
-                 TotalBsmtSF: int,
-                 Heating: str,
-                 HeatingQC: str,
-                 CentralAir: str,
-                 Electrical: str,
-                 FirstFlrSF: int,
-                 SecondFlrSF: int,
-                 LowQualFinSF: int,
                  GrLivArea: int,
-                 BsmtFullBath: int,
-                 BsmtHalfBath: int,
                  FullBath: int,
-                 HalfBath: int,
                  BedroomAbvGr: int,
-                 KitchenAbvGr: int,
                  KitchenQual: str,
-                 TotRmsAbvGrd: int,
-                 Functional: str,
-                 Fireplaces: int,
-                 FireplaceQu: str,
-                 GarageType: str,
-                 GarageYrBlt: float,
-                 GarageFinish: str,
                  GarageCars: int,
                  GarageArea: int,
-                 GarageQual: str,
-                 GarageCond: str,
-                 PavedDrive: str,
-                 WoodDeckSF: int,
-                 OpenPorchSF: int,
-                 EnclosedPorch: int,
-                 ThreeSsnPorch: int,
-                 ScreenPorch: int,
-                 PoolArea: int,
-                 PoolQC: str,
-                 Fence: str,
-                 MiscFeature: str,
-                 MiscVal: int,
-                 MoSold: int,
-                 YrSold: int,
-                 SaleType: str,
-                 SaleCondition: str):
-        
-        # Assign all inputs to object attributes
-        self.MSSubClass = MSSubClass
+                 Fireplaces: int,
+                 TotalBsmtSF: int = 0):
         self.MSZoning = MSZoning
+        self.Neighborhood = Neighborhood
         self.LotFrontage = LotFrontage
         self.LotArea = LotArea
-        self.Street = Street
-        self.Alley = Alley
-        self.LotShape = LotShape
-        self.LandContour = LandContour
-        self.Utilities = Utilities
-        self.LotConfig = LotConfig
-        self.LandSlope = LandSlope
-        self.Neighborhood = Neighborhood
-        self.Condition1 = Condition1
-        self.Condition2 = Condition2
-        self.BldgType = BldgType
-        self.HouseStyle = HouseStyle
         self.OverallQual = OverallQual
         self.OverallCond = OverallCond
         self.YearBuilt = YearBuilt
         self.YearRemodAdd = YearRemodAdd
-        self.RoofStyle = RoofStyle
-        self.RoofMatl = RoofMatl
-        self.Exterior1st = Exterior1st
-        self.Exterior2nd = Exterior2nd
-        self.MasVnrType = MasVnrType
-        self.MasVnrArea = MasVnrArea
-        self.ExterQual = ExterQual
-        self.ExterCond = ExterCond
-        self.Foundation = Foundation
-        self.BsmtQual = BsmtQual
-        self.BsmtCond = BsmtCond
-        self.BsmtExposure = BsmtExposure
-        self.BsmtFinType1 = BsmtFinType1
-        self.BsmtFinSF1 = BsmtFinSF1
-        self.BsmtFinType2 = BsmtFinType2
-        self.BsmtFinSF2 = BsmtFinSF2
-        self.BsmtUnfSF = BsmtUnfSF
-        self.TotalBsmtSF = TotalBsmtSF
-        self.Heating = Heating
-        self.HeatingQC = HeatingQC
-        self.CentralAir = CentralAir
-        self.Electrical = Electrical
-        self.FirstFlrSF = FirstFlrSF
-        self.SecondFlrSF = SecondFlrSF
-        self.LowQualFinSF = LowQualFinSF
         self.GrLivArea = GrLivArea
-        self.BsmtFullBath = BsmtFullBath
-        self.BsmtHalfBath = BsmtHalfBath
         self.FullBath = FullBath
-        self.HalfBath = HalfBath
         self.BedroomAbvGr = BedroomAbvGr
-        self.KitchenAbvGr = KitchenAbvGr
         self.KitchenQual = KitchenQual
-        self.TotRmsAbvGrd = TotRmsAbvGrd
-        self.Functional = Functional
-        self.Fireplaces = Fireplaces
-        self.FireplaceQu = FireplaceQu
-        self.GarageType = GarageType
-        self.GarageYrBlt = GarageYrBlt
-        self.GarageFinish = GarageFinish
         self.GarageCars = GarageCars
         self.GarageArea = GarageArea
-        self.GarageQual = GarageQual
-        self.GarageCond = GarageCond
-        self.PavedDrive = PavedDrive
-        self.WoodDeckSF = WoodDeckSF
-        self.OpenPorchSF = OpenPorchSF
-        self.EnclosedPorch = EnclosedPorch
-        self.ThreeSsnPorch = ThreeSsnPorch
-        self.ScreenPorch = ScreenPorch
-        self.PoolArea = PoolArea
-        self.PoolQC = PoolQC
-        self.Fence = Fence
-        self.MiscFeature = MiscFeature
-        self.MiscVal = MiscVal
-        self.MoSold = MoSold
-        self.YrSold = YrSold
-        self.SaleType = SaleType
-        self.SaleCondition = SaleCondition
+        self.Fireplaces = Fireplaces
+        self.TotalBsmtSF = TotalBsmtSF
 
     def get_data_as_data_frame(self):
-        """
-        Converts input values into a single-row DataFrame.
-        """
+        '''
+        Converts the user inputs into a DataFrame
+        '''
         try:
-            data_dict = self.__dict__
-            return pd.DataFrame([data_dict])
+            # self.__dict__ - It returns a dictionary containing all the instance variables and their current values. .copy() - creates a copy of all the instance variables (attributes) of an object and stores it in a dictionary called input_dict.
+            input_dict = self.__dict__.copy()
+            # Create a DataFrame from the input data.
+            df = pd.DataFrame([input_dict])
+            return df
 
         except Exception as e:
             raise CustomException(e, sys)

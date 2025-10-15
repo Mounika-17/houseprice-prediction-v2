@@ -24,7 +24,7 @@ class DataIngestion:
     def initiate_data_ingestion(self):
         logger.info("Entered the data ingestion method or component")
         try:
-            file_path = os.path.join("notebook", "data", "processed_data", "saleprice_cleaned_dataset.csv")
+            file_path = os.path.join("notebook", "data", "processed_data", "lightweight_data.csv")
             df = pd.read_csv(file_path)
             logger.info("Read the dataset as dataframe")
 

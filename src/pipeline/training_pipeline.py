@@ -22,6 +22,12 @@ if __name__ == "__main__":
     logger.info("Data transformation pipeline created.")
     logger.info("Step 3: Model Training")
 
-    # Step 3: Model Training
+   # Verify if the data that is being passed to the model trainer is correct
+    logger.info(f"Train data path: {train_data_path}")
+    logger.info(f"Test data path: {test_data_path}")
+  
+   # Step 3: Model Training
     model_trainer = ModelTrainer()
     model_trainer.initiate_model_trainer(train_data_path, test_data_path, preprocessor,target_feature)
+
+
