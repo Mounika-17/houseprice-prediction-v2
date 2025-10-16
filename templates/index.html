@@ -3,27 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Home Page - House Price Prediction</title>
+    <title>Home - House Price Prediction</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-    <div class="container">
+    <div class="home-container">
         <h1>Welcome to the House Price Prediction App</h1>
-
-        <p class="description">
-            This web app predicts the price of a house based on important features such as its location, area, 
-            quality, number of rooms, garage space, and more. 
-            Enter the house details and get an estimated price instantly.
+        <p>
+            This web app predicts the price of a house based on key features such as its 
+            location, area, quality, number of rooms, garage space, and more.
         </p>
-
-        <p class="dataset-link">
-            You can explore the Kaggle Housing dataset here:
+        <p>
+            Enter the house details in the form and get an estimated price instantly.
+        </p>
+        <p>
+            You can explore the Kaggle dataset used for training the model here: 
             <a href="https://www.kaggle.com/competitions/house-prices-advanced-regression-techniques/data?select=test.csv" target="_blank">
                 Housing Dataset on Kaggle
             </a>
         </p>
-
         <a href="{{ url_for('predict_datapoint') }}" class="cta-button">Start Prediction</a>
     </div>
 </body>
 </html>
+

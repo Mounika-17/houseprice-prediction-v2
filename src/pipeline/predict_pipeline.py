@@ -2,6 +2,7 @@ import sys
 import pandas as pd
 from src.exception import CustomException
 from src.utils import load_object
+import numpy as np
 
 
 class PredictPipeline:
@@ -18,7 +19,9 @@ class PredictPipeline:
             model = load_object(file_path=model_path)
 
             # Directly predict since model.pkl has the preprocessing inside
-            preds = model.predict(features)
+            preds_log = model.predict(features)
+            # Convert back from log scale to original scale
+            preds = np.expm1(preds_log)  # np.expm1 is used to reverse np.log1p
             return preds
 
         except Exception as e:

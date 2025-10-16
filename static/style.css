@@ -1,83 +1,146 @@
-/*---------- Form styling ----------*/
+/* Global Page Style */
 body {
     font-family: 'Poppins', sans-serif;
     background: #f5f6fa;
+    margin: 0;
+    padding: 0;
     display: flex;
     justify-content: center;
-    align-items: center;
-    height: 100vh;
+    align-items: flex-start;
+    min-height: 100vh;
 }
 
+/* Center Container */
 .container {
     background: #fff;
     border-radius: 15px;
-    padding: 30px 40px;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-    width: 450px;
+    padding: 40px 50px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    width: 90%;
+    max-width: 550px;
+    margin: 60px auto;
 }
 
+/* Heading */
 h1 {
     text-align: center;
     color: #2f3640;
-    margin-bottom: 20px;
+    margin-bottom: 25px;
 }
 
+/* Form Rows */
 .row {
-    margin-bottom: 15px;
+    margin-bottom: 18px;
 }
 
 label {
     font-weight: bold;
     display: block;
-    margin-bottom: 5px;
+    margin-bottom: 6px;
+    color: #333;
 }
 
-input {
-    width: 100%;
-    padding: 8px;
-    border-radius: 8px;
-    border: 1px solid #dcdde1;
-}
-
-button {
+input,
+select {
     width: 100%;
     padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #dcdde1;
+    font-size: 15px;
+}
+
+/* Submit Button */
+button {
+    width: 100%;
+    padding: 12px;
     background: #273c75;
     color: white;
     border: none;
     border-radius: 8px;
     font-size: 16px;
     cursor: pointer;
+    margin-top: 10px;
 }
 
 button:hover {
     background: #40739e;
 }
 
+/* Result Text */
 .result {
     text-align: center;
     color: #44bd32;
     margin-top: 25px;
+    font-weight: 600;
 }
 
-/* ---------- Homepage styling ---------- */
-
-p {
-    margin: 0;
+/* Home Page Style */
+.home-container {
+    max-width: 800px;
+    margin: 120px auto;
+    background: white;
+    padding: 50px 40px;
+    border-radius: 15px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    text-align: center;
 }
 
-a.cta-link {
-    display: inline-block;
-    padding: 12px 25px;
-    background-color: #273c75;
-    color: white;
+.home-container h1 {
+    color: #2f3640;
+    font-size: 2.3rem;
+    margin-bottom: 25px;
+}
+
+.home-container p {
+    font-size: 1.1rem;
+    color: #555;
+    margin-bottom: 25px;
+    line-height: 1.6;
+}
+
+.home-container a {
+    color: #40739e;
     text-decoration: none;
+}
+
+.home-container a:hover {
+    text-decoration: underline;
+}
+
+.cta-button {
+    display: inline-block;
+    background-color: #44bd32;
+    color: white;
+    padding: 14px 28px;
     border-radius: 8px;
-    font-size: 1rem;
+    font-size: 1.1rem;
+    text-decoration: none;
     transition: background 0.3s ease;
 }
 
-a.cta-link:hover {
-    background-color: #40739e;
+.cta-button:hover {
+    background-color: #2ecc71;
+}
+
+/* Make sure form scrolls properly on smaller screens */
+@media screen and (max-height: 700px) {
+    body {
+        align-items: flex-start;
+    }
+    .container {
+        margin: 40px auto;
+    }
+}
+
+/* Remove spinner arrows from number inputs in all browsers */
+input[type=number] {
+    appearance: textfield; /* Standard property */
+    -moz-appearance: textfield; /* Firefox */
+    -webkit-appearance: none; /* Chrome, Safari, Edge */
+}
+input[type=number]::-webkit-outer-spin-button,
+input[type=number]::-webkit-inner-spin-button {
+    margin: 0;
+    -webkit-appearance: none;
 }
 

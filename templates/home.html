@@ -9,50 +9,50 @@
 <body>
     <div class="container">
         <h1>🏡 House Price Prediction App</h1>
-        <form action="{{ url_for('predict_datapoint')}}" method="post">
+        <form action="{{ url_for('predict_datapoint') }}" method="post">
 
             <div class="row">
                 <label>MSZoning:</label>
-                <input type="text" name="MSZoning" placeholder="MSZoning" required>
+                <input type="text" name="MSZoning" placeholder="e.g. RL" required>
             </div>
 
             <div class="row">
                 <label>Neighborhood:</label>
-                <input type="text" name="Neighborhood" placeholder="Neighborhood" required>
+                <input type="text" name="Neighborhood" placeholder="e.g. CollgCr" required>
             </div>
 
             <div class="row">
-                <label>LotFrontage:</label>
-                <input type="number" step="any" name="LotFrontage" required>
+                <label for="LotFrontage">LotFrontage:</label>
+                <input type="number" name="LotFrontage" required>
             </div>
 
             <div class="row">
-                <label>LotArea:</label>
+                <label for="LotArea">LotArea:</label>
                 <input type="number" name="LotArea" required>
             </div>
 
             <div class="row">
                 <label>OverallQual (1-10):</label>
-                <input type="number" name="OverallQual" required>
+                <input type="number" name="OverallQual" min="1" max="10" required>
             </div>
 
             <div class="row">
                 <label>OverallCond (1-10):</label>
-                <input type="number" name="OverallCond" required>
+                <input type="number" name="OverallCond" min="1" max="10" required>
             </div>
 
             <div class="row">
-                <label>YearBuilt:</label>
+                <label for="YearBuilt">YearBuilt:</label>
                 <input type="number" name="YearBuilt" required>
             </div>
 
             <div class="row">
-                <label>YearRemodAdd:</label>
+                <label for="YearRemodAdd">YearRemodAdd:</label>
                 <input type="number" name="YearRemodAdd" required>
             </div>
 
             <div class="row">
-                <label>GrLivArea (sq ft):</label>
+                <label for="GrLivArea">GrLivArea (sq ft):</label>
                 <input type="number" name="GrLivArea" required>
             </div>
 
@@ -77,7 +77,7 @@
             </div>
 
             <div class="row">
-                <label>GarageArea:</label>
+                <label for="GarageArea">GarageArea:</label>
                 <input type="number" name="GarageArea" required>
             </div>
 
@@ -87,16 +87,28 @@
             </div>
 
             <div class="row">
-                <label>TotalBsmtSF:</label>
+                <label for="TotalBsmtSF">TotalBsmtSF:</label>
                 <input type="number" name="TotalBsmtSF" required>
             </div>
 
             <button type="submit">Predict Price</button>
         </form>
-
+        
         {% if results %}
-            <h2 class="result"> Predicted House Price: ${{ results }}</h2>
+            <div id="result" class="result">
+                <h2>Predicted House Price: ${{ results }}</h2>
+            </div>
         {% endif %}
     </div>
+
+    <!-- Scroll Fix Script -->
+    <script>
+        window.onload = function() {
+            const result = document.getElementById("result");
+            if (result) {
+                result.scrollIntoView({ behavior: "smooth" });
+            }
+        };
+    </script>
 </body>
 </html>
