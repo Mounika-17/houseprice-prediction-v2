@@ -13,4 +13,7 @@ xgboost
 catboost
 flask
 dill
+fastapi
+uvicorn
+pydantic
 -e .

@@ -1,0 +1,45 @@
+1. I will extract the 17 important features from my full dataset(81 features) and creates a new csv file under notebook folder as lightweight_data.csv file
+2. I will write my code in create_lightweight_data.py file and execute it to create my data/
+3. Initially I have built the project same as my other ML projects using Flask
+4. To deploy my project using Render FastAPI, what I did is I have updated my app.py code. Below are the list of the files that are added/updated:
+
+| File                  | Action                                     |
+| --------------------- | ------------------------------------------ |
+| `app.py`              | ✨ Replace Flask code with new FastAPI code |
+| `requirements.txt`    | Add FastAPI + uvicorn                      |
+| `Procfile`            | Add Render start command                   |
+| `runtime.txt`         | (Optional) Add Python version              |
+| `predict_pipeline.py` | ✅ No change                                |
+| `artifacts/`          | ✅ No change                                |
+
+Difference in using the Flask and FastAPI:
+
+| Item             | Current (Flask)                    | New (FastAPI)                                           |
+| ---------------- | ---------------------------------- | ------------------------------------------------------- |
+| Web framework    | Flask                              | FastAPI                                                 |
+| Route syntax     | `@app.route()`                     | `@app.get()` / `@app.post()`                            |
+| Form rendering   | HTML templates (`render_template`) | JSON-based API (you can still add HTML later if needed) |
+| Request handling | `request.form.get()`               | Pydantic model (typed JSON request)                     |
+| Output           | Rendered HTML                      | JSON response                                           |
+| Deployment       | Not ideal for Render               | Fully supported on Render                               |
+
+
+Test locally before deploying
+
+In the terminal run the below commands:
+
+pip install -r requirements.txt
+uvicorn app:app --reload
+
+
+Then open:
+http://127.0.0.1:8000
+
+
+You should see:
+{"message": "House Price Prediction API is live!"}
+
+
+You can test /predict in Swagger UI at:
+http://127.0.0.1:8000/docs
+
