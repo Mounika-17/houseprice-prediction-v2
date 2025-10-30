@@ -45,7 +45,7 @@ Below are the results from the model training pipeline (`logs/ml_pipeline_logger
 ---
 
 ## 📁 Project Structure
-<pre> ```bash HOUSEPRICE-PREDICTION-V2/ │ ├── artifacts/ │ ├── model.pkl │ ├── train.csv │ └── test.csv │ ├── logs/ │ └── (log files generated during data processing & training) │ ├── notebook/ │ ├── data/ │ ├── create_lightweight_data.py │ └── eda_model_training.ipynb │ ├── src/ │ ├── components/ │ ├── pipeline/ │ ├── config.py │ ├── exception.py │ ├── logger.py │ └── utils.py │ ├── app.py ├── requirements.txt ├── setup.py ├── runtime.txt ├── Procfile ├── README.md └── .gitignore ``` </pre>
+<pre> ``` HOUSEPRICE-PREDICTION-V2/ │ ├── artifacts/ │ ├── model.pkl │ ├── train.csv │ └── test.csv │ ├── logs/ │ └── (log files generated during data processing & training) │ ├── notebook/ │ ├── data/ │ ├── create_lightweight_data.py │ └── eda_model_training.ipynb │ ├── src/ │ ├── components/ │ ├── pipeline/ │ ├── config.py │ ├── exception.py │ ├── logger.py │ └── utils.py │ ├── app.py ├── requirements.txt ├── setup.py ├── runtime.txt ├── Procfile ├── README.md └── .gitignore ``` </pre>
 
 ## ⚙️ Tech Stack
 
@@ -100,4 +100,5 @@ Kaggle Advanced House Price Prediction Dataset
 FastAPI Documentation  
 
 Render Deployment Platform  
+
 
