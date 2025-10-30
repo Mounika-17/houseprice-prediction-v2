@@ -45,37 +45,7 @@ Below are the results from the model training pipeline (`logs/ml_pipeline_logger
 ---
 
 ## 📁 Project Structure
-HOUSEPRICE-PREDICTION-V2/
-│
-├── artifacts/
-│ ├── model.pkl
-│ ├── train.csv
-│ └── test.csv
-│
-├── logs/
-│ └── (log files generated during data processing & training)
-│
-├── notebook/
-│ ├── data/
-│ ├── create_lightweight_data.py
-│ └── eda_model_training.ipynb
-│
-├── src/
-│ ├── components/
-│ ├── pipeline/
-│ ├── config.py
-│ ├── exception.py
-│ ├── logger.py
-│ └── utils.py
-│
-│
-├── app.py
-├── requirements.txt
-├── setup.py
-├── runtime.txt
-├── Procfile
-├── README.md
-└── .gitignore
+<pre> ```bash HOUSEPRICE-PREDICTION-V2/ │ ├── artifacts/ │ ├── model.pkl │ ├── train.csv │ └── test.csv │ ├── logs/ │ └── (log files generated during data processing & training) │ ├── notebook/ │ ├── data/ │ ├── create_lightweight_data.py │ └── eda_model_training.ipynb │ ├── src/ │ ├── components/ │ ├── pipeline/ │ ├── config.py │ ├── exception.py │ ├── logger.py │ └── utils.py │ ├── app.py ├── requirements.txt ├── setup.py ├── runtime.txt ├── Procfile ├── README.md └── .gitignore ``` </pre>
 
 ## ⚙️ Tech Stack
 
@@ -106,7 +76,7 @@ https://houseprice-prediction-v2.onrender.com/
 ### 📘 API Docs:  
 https://houseprice-prediction-v2.onrender.com/docs  
 
-✨ Key Highlights  
+## ✨ Key Highlights  
 
 ✅ Lightweight version → Predict quickly with fewer inputs  
 ✅ Modular and production-ready ML pipeline  
@@ -114,19 +84,20 @@ https://houseprice-prediction-v2.onrender.com/docs
 ✅ Integrated logging and error handling  
 ✅ Fully reproducible results  
 
-👩‍💻 Author  
+## 👩‍💻 Author  
 Mounika Maradana  
 📧 https://www.linkedin.com/in/mounikamaradana/  
 🌐 https://github.com/Mounika-17  
 
-🏁 License  
+## 🏁 License  
 
 This project is open-source and available under the MIT License.  
 
-🧱 Acknowledgements  
+## 🧱 Acknowledgements  
 
 Kaggle Advanced House Price Prediction Dataset  
 
 FastAPI Documentation  
 
 Render Deployment Platform  
+
